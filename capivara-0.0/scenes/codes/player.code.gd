@@ -72,6 +72,8 @@ func _physics_process(_delta: float) -> void:
 	
 	cont_vel_pstgf()
 	
+	cooldown_run()
+	
 	#esse aqui é apenas um "comando" que faz as coisas realmente acontecerem.
 	move_and_slide()
 
@@ -333,3 +335,8 @@ func velocity0():
 	if velocity.x == 0:
 		conta_stage_run = 0
 		stage_run = 0
+
+func cooldown_run():
+	print('banana')
+	#if velocity.x > 900:
+		
