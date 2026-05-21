@@ -1,33 +1,32 @@
 extends CharacterBody2D
 
 #variaveis
-var grav = 15  #grav: valor da gravidade do player
-var speed = 350  #speed: valor da velocidade do player (o tanto q ele anda)
-var tim_coyote = 0.0  #tim_coyote: ele é basicamente o mesmo q o "tim_o_meter", só q ele funciona para quando ele estiver caindo ter um atraso antes de cair (igual o coyote do desenho do papaléguas, bep bep!) e tambem da pra controlar a altura do pulo.
-var is_falling = false  #is_falling: isso apenas mostra pro código se o player pulou ou nao
-var jumped = false  #jumped: mesma coisa do "falling", só q ele mostra se o player pulou.
-var ass_powered = false  #ass_powered: mostra se o player deu um "ASS POWER!!!".
-var couldown_ass_power = 5.0  #couldown_ass_power: ele é o tempo em q o player fica parado após o "ASS POWER!!!".
-var shake_strength = 0.0  #forca do shake (shake = tremer pros bot dos ingreis haha)
-var contador_shake = 0.0  #conta quando o shake pode ou nao acontecer
-var permetidor_shake = false  #permite ou nao o contador shake contar
-var rezet_shake = false   #rezeta o contador shake
-var c_shake = 0 # conta o quantas vezes o botão pra efetuar o ass_power foi apertado
-var c_shake_cool = 0.0 # conta os milissegundos pra considerar double click
+var grav:int = 15  #grav: valor da gravidade do player
+var speed:int = 350  #speed: valor da velocidade do player (o tanto q ele anda)
+var tim_coyote:float = 0.0  #tim_coyote: ele é basicamente o mesmo q o "tim_o_meter", só q ele funciona para quando ele estiver caindo ter um atraso antes de cair (igual o coyote do desenho do papaléguas, bep bep!) e tambem da pra controlar a altura do pulo.
+var is_falling:bool = false  #is_falling: isso apenas mostra pro código se o player pulou ou nao
+var jumped:bool = false  #jumped: mesma coisa do "falling", só q ele mostra se o player pulou.
+var ass_powered:bool = false  #ass_powered: mostra se o player deu um "ASS POWER!!!".
+var couldown_ass_power:float = 5.0  #couldown_ass_power: ele é o tempo em q o player fica parado após o "ASS POWER!!!".
+var shake_strength:int = 0  #forca do shake (shake = tremer pros bot dos ingreis haha)
+var contador_shake:float = 0.0  #conta quando o shake pode ou nao acontecer
+var permetidor_shake:bool = false  #permite ou nao o contador shake contar
+var rezet_shake:bool = false   #rezeta o contador shake
+var c_shake:int = 0 # conta o quantas vezes o botão pra efetuar o ass_power foi apertado
+var c_shake_cool:float = 0.0 # conta os milissegundos pra considerar double click
 @onready var camera = $Camera2D  #é a camera
-var pode_jumpwall = false  #ele permite se pode jumpwall ou nao
-var contador_jumpwall = 0.0  #ele conta por quanto tempo o jumpwall ficara verdadeiro.
+var pode_jumpwall:bool = false  #ele permite se pode jumpwall ou nao
+var contador_jumpwall:float = 0.0  #ele conta por quanto tempo o jumpwall ficara verdadeiro.
 #var lookahead = 800  # distância à frente do player
 #var target_x = 0
-var stage_run = 0 # estagios de velocidade da corrida (de 0 a 2)
+var stage_run:int = 0 # estagios de velocidade da corrida (de 0 a 2)
 var conta_stage_run:int = 0 # tempo de cooldown entre os estagios
-var plan = false # verifica se o player planou
-var cont_vel_pstg = 0
-
+var plan:bool = false # verifica se o player planou
+var cont_vel_pstg:float = 0.0
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
-	if is_on_floor() and !Input.is_key_label_pressed(KEY_A) and !Input.is_key_label_pressed(KEY_D):
+	if is_on_floor() and !Input.is_action_pressed("walk_left") and !Input.is_action_pressed("walk_right"):
 		$AnimatedSprite2D.play("idle")
 	#isso apenas mostra se o player está caindo ou nao, por ser tão curto eu deixei no proprio func process mesmo.
 	if !is_on_floor():
@@ -81,17 +80,17 @@ func _physics_process(_delta: float) -> void:
 func _plane():
 	#ao apertar e presionar "W" e nao tiver contato com paredes, o eixo y do player tera 70 adicionado na queda.
 	#(faz planar)
-	if Input.is_key_pressed(KEY_W) and !is_on_wall():
-		velocity.y = move_toward(velocity.y, 200, 20)
+	if Input.is_action_pressed("plan") and !is_on_wall():
+		velocity.y = 50
 		plan = true
 		#mas se apertar J e D o player irá planar mais rapidamente, ou seja. ele caira mais rapido. (vale pra esquerda tambem)
-		if Input.is_key_pressed(KEY_J) and Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_J) and Input.is_key_pressed(KEY_A):
+		if Input.is_action_pressed("RUN") and Input.is_action_pressed("walk_left") or Input.is_action_pressed("RUN") and Input.is_action_pressed("walk_right"):
 			velocity.y = move_toward(velocity.y, 150, 15)
 
 #esse aqui é a funcao "move basics" (que de basico nao tem nada).
 func _move_basics():
 	#se apertar D e o "coldown_ass_power" for 0, o eixo x sera igual o valor da variavel speed (o palyer anda).
-	if Input.is_key_pressed(KEY_D):
+	if Input.is_action_pressed("walk_right"):
 		if c_shake <= 1:
 			if couldown_ass_power == 0:
 				#isso só deixa o sprite do player pra direita.
@@ -99,7 +98,7 @@ func _move_basics():
 				if is_on_floor():
 					$AnimatedSprite2D.play("walk")
 				#se apertar J junto e estiver no chao o player corre.
-				if Input.is_key_pressed(KEY_J):
+				if Input.is_action_pressed("RUN"):
 					if stage_run == 0: # estagios do 0 ao 2
 						velocity.x = move_toward(velocity.x, speed + 400, 20)
 					elif stage_run == 1:
@@ -112,13 +111,13 @@ func _move_basics():
 		else:
 			velocity.x = move_toward(velocity.x, 0, 40)
 	#isso é a mesa coisa, so q com o A (q dai é pra esquerda)
-	elif Input.is_key_pressed(KEY_A):
+	elif Input.is_action_pressed("walk_left"):
 		if c_shake <= 1:
 			if couldown_ass_power == 0:
 				$AnimatedSprite2D.flip_h = true
 				if is_on_floor():
 					$AnimatedSprite2D.play("walk")
-				if Input.is_key_pressed(KEY_J):
+				if Input.is_action_pressed("RUN"):
 					if stage_run == 0:
 						velocity.x = move_toward(velocity.x, -speed - 400, 20)
 					elif stage_run == 1:
@@ -137,9 +136,9 @@ func _move_basics():
 func _slide_run_wall():
 	if is_on_wall() and !is_on_floor():
 		velocity.y = 100
-		if Input.is_key_pressed(KEY_S):
+		if Input.is_action_pressed("ASS_POWER"):
 			velocity.y = -30
-		if Input.is_key_pressed(KEY_J) and !Input.is_key_pressed(KEY_S):
+		if Input.is_action_pressed("RUN") and !Input.is_action_pressed("ASS_POWER"):
 			if stage_run == 0:
 				velocity.y += - 800
 			elif stage_run == 1:
@@ -147,7 +146,7 @@ func _slide_run_wall():
 			elif stage_run == 2:
 				velocity.y += - 2000
 			
-			if Input.is_key_pressed(KEY_K):
+			if Input.is_action_pressed("ASS_POWER"):
 				velocity.y +=  - 150
 			if !is_on_wall():
 				velocity.y += 200
@@ -169,7 +168,7 @@ func _ASS_POWER():
 		c_shake_cool = 0.0
 	#se apertar S e NAO estiver no chao e NAO estiver apertando K o eixo y do player aumenta continuamente em 400.
 	#(que faz ele cair bem rapido)
-	if Input.is_action_pressed("ASS_POWER") and !is_on_floor() and !Input.is_key_label_pressed(KEY_K) and c_shake >= 2:
+	if Input.is_action_pressed("ASS_POWER") and !is_on_floor() and !Input.is_action_pressed("jump") and c_shake >= 2:
 		if !is_on_wall():
 			velocity.y += 400
 			#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 3.0
@@ -199,6 +198,10 @@ func _ASS_POWER():
 		if c_shake_cool > 1.0:
 				c_shake = 0
 				c_shake_cool = 0.0
+	else:
+		if c_shake_cool > 1.0 and is_on_floor():
+			c_shake_cool = 0.0
+			c_shake = 0
 
 #essa funcao aqui faz o player pular, da pra ver q nao é tao simples por ter "apenas" 24 linhas de codigo, nao é? (sim, eu contei a linhas. [na verdade só diminui 30 por 52 mesmo e {diminui 1 (no final eu so copiei e colei no inicio mesmo)}, mas isso nao interessa, volta pro código!!! D:< ]).
 func _jump():
@@ -206,7 +209,7 @@ func _jump():
 	if is_on_floor():
 		#se o coldown for menor ou igual a 0 o player po pular. 
 		if couldown_ass_power <= 0:
-			if Input.is_key_label_pressed(KEY_K) and !Input.is_key_label_pressed(KEY_W) and !Input.is_key_label_pressed(KEY_S):
+			if Input.is_action_just_pressed("jump") and !Input.is_action_pressed("plan") and !Input.is_action_pressed("ASS_POWER"):
 				jumped = true
 				velocity.y -= 300
 	#se nao estiver em contato com o chao...
@@ -214,7 +217,7 @@ func _jump():
 		#...e se o "jumped" for false e o tim_coyote for menor ou igual a 1, o eixo y diminue em 100 
 		if jumped == false:
 			if tim_coyote <= 2:
-				if Input.is_key_pressed(KEY_K):
+				if Input.is_action_just_pressed("jump"):
 					velocity.y -= 80
 		#e se nao (q dai o jumped for true) o eixo y aumenta igual o valor de grav (o player cai)
 		else:
@@ -223,7 +226,7 @@ func _jump():
 		if jumped == true:
 			if tim_coyote <= 1:
 				#se tiver apertando K o eixo y diminuira 20 (aumentando o pulo, dando uma leve semelhanca ao yoshi do "mario world" [só leve...])
-				if Input.is_key_pressed(KEY_K):
+				if Input.is_action_just_pressed("jump"):
 					velocity.y -= 10
 		#se nao o player só cai mesmo
 		else:
@@ -258,9 +261,9 @@ func camera_shake(_delta):
 	#se nao tiver numa parede e nao tiver apertando K (resumidamente a camera chacoalha)
 	if stage_run == 0:
 		if !is_on_wall():
-			if !Input.is_key_pressed(KEY_K):
+			if !Input.is_action_pressed("jump"):
 				if shake_strength > 0:
-					camera.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_strength
+					camera.offset = Vector2(randf_range(-2, 2), randf_range(-2, 2)) * shake_strength
 					shake_strength = lerp(shake_strength, 0, _delta * 5)
 				else:
 					camera.offset = Vector2.ZERO
@@ -273,18 +276,18 @@ func jumpwall():
 	#e se fica verdadeiro e apertar K e...
 	if pode_jumpwall == true:
 		#ele da um (pulo do ar)
-		if Input.is_key_pressed(KEY_K) and !is_on_wall():
+		if Input.is_action_pressed("jump") and !is_on_wall():
 			velocity.y -= 150
 			#e se nao estiver na parede o contador jumpwall comeca a contar.
 			if !is_on_wall():
 				contador_jumpwall += 0.1
 			#se aperta A durante tudo isso o player dara uma investida pra esquerda.
-			if Input.is_key_pressed(KEY_A):
+			if Input.is_action_pressed("walk_left"):
 				velocity.x += -40
 			#se aperta D durante tudo isso o player dara uma investida pra direita.
-			if Input.is_key_pressed(KEY_D):
+			if Input.is_action_pressed("walk_right"):
 				velocity.x += 40
-		elif Input.is_key_pressed(KEY_K) and is_on_wall():
+		elif Input.is_action_pressed("jump") and is_on_wall():
 			contador_jumpwall = -0.5
 	#se estiver o chao o pode jumpwall fica falso
 	if is_on_floor():
@@ -301,7 +304,7 @@ func jumpwall():
 	
 func _stage_run():
 	if cont_vel_pstg == 0:
-		if Input.is_key_label_pressed(KEY_J) and plan == false:
+		if Input.is_action_pressed("RUN") and plan == false:
 			conta_stage_run +=  1
 
 			if conta_stage_run >= 150 and conta_stage_run < 350:
@@ -320,7 +323,7 @@ func _stage_run():
 		
 
 func cont_vel_pstgf():
-	if Input.is_key_label_pressed(KEY_J):
+	if Input.is_action_pressed("RUN"):
 		if velocity.x == 0:
 			cont_vel_pstg += 0.1
 			if cont_vel_pstg == 0.1:
