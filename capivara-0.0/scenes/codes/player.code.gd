@@ -24,6 +24,7 @@ var conta_stage_run:int = 0 # tempo de cooldown entre os estagios
 var plan = false # verifica se o player planou
 var cont_vel_pstg = 0
 
+
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
 	if is_on_floor() and !Input.is_key_label_pressed(KEY_A) and !Input.is_key_label_pressed(KEY_D):
@@ -73,8 +74,6 @@ func _physics_process(_delta: float) -> void:
 	
 	cont_vel_pstgf()
 	
-	#cooldown_run()
-	
 	#esse aqui é apenas um "comando" que faz as coisas realmente acontecerem.
 	move_and_slide()
 
@@ -93,7 +92,7 @@ func _plane():
 func _move_basics():
 	#se apertar D e o "coldown_ass_power" for 0, o eixo x sera igual o valor da variavel speed (o palyer anda).
 	if Input.is_key_pressed(KEY_D):
-		if !Input.is_key_pressed(KEY_S):
+		if c_shake <= 1:
 			if couldown_ass_power == 0:
 				#isso só deixa o sprite do player pra direita.
 				$AnimatedSprite2D.flip_h = false
@@ -114,7 +113,7 @@ func _move_basics():
 			velocity.x = move_toward(velocity.x, 0, 40)
 	#isso é a mesa coisa, so q com o A (q dai é pra esquerda)
 	elif Input.is_key_pressed(KEY_A):
-		if !Input.is_key_pressed(KEY_S):
+		if c_shake <= 1:
 			if couldown_ass_power == 0:
 				$AnimatedSprite2D.flip_h = true
 				if is_on_floor():
@@ -157,39 +156,47 @@ func _slide_run_wall():
 	
 #essa funcao aqui faz com q o player de um "ground pound" no chao, mas eu prefiro chamar de ass power mesmo.
 func _ASS_POWER():
+	print("cooldown ass power: ", c_shake_cool)
 	#isso aq conta quantas vezes a ação "ASS_POWER" foi apertada
 	if Input.is_action_just_pressed("ASS_POWER"):
 		c_shake += 1
+	
+	elif c_shake > 0:
 		c_shake_cool += 0.1
-	if c_shake_cool < 0.5:
+	
+	elif c_shake_cool >= 1.0:
 		c_shake = 0
+		c_shake_cool = 0.0
 	#se apertar S e NAO estiver no chao e NAO estiver apertando K o eixo y do player aumenta continuamente em 400.
 	#(que faz ele cair bem rapido)
-	if c_shake >= 2:
-		if Input.is_action_pressed("ASS_POWER") and !is_on_floor() and !Input.is_key_label_pressed(KEY_K):
-			if !is_on_wall():
-				velocity.y += 400
-				#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 3.0
-				ass_powered = true
-				couldown_ass_power = 2.0
-				permetidor_shake = true
-		#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.2
-		elif Input.is_action_pressed("ASS_POWER") and is_on_floor():
-			c_shake = 0
-			c_shake_cool = 0.0
-			ass_powered = false
-			couldown_ass_power -= 0.1
-			shake_strength = 20
-			if permetidor_shake == true:
-				contador_shake += 0.1
-			
-			#dai se chegar a 0 ou menos (o ou menos eu coloquei so pra garantir q ele pare de diminuir mesmo) fica = 0
-			if couldown_ass_power <= 0:
-				couldown_ass_power = 0
-		#se nenhum desses dois acontecer e apertar S mesmo assim o couldown fica = 0
-		else:
-			if !Input.is_key_label_pressed(KEY_S):
-				couldown_ass_power = 0
+	if Input.is_action_pressed("ASS_POWER") and !is_on_floor() and !Input.is_key_label_pressed(KEY_K) and c_shake >= 2:
+		if !is_on_wall():
+			velocity.y += 400
+			#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 3.0
+			ass_powered = true
+			couldown_ass_power = 2.0
+			permetidor_shake = true
+	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.2
+	elif is_on_floor() and c_shake >= 2:
+		ass_powered = false
+		couldown_ass_power -= 0.1
+		shake_strength = 20
+		if permetidor_shake == true:
+			contador_shake += 0.1
+		
+		#dai se chegar a 0 ou menos (o ou menos eu coloquei so pra garantir q ele pare de diminuir mesmo) fica = 0
+		if couldown_ass_power <= 0:
+			couldown_ass_power = 0
+	#se nenhum desses dois acontecer e apertar S mesmo assim o couldown fica = 0
+	else:
+		if !Input.is_action_pressed("ASS_POWER"):
+			couldown_ass_power = 0
+			if c_shake_cool > 1.0:
+				c_shake = 0
+				c_shake_cool = 0.0
+	
+	if !Input.is_action_pressed("ASS_POWER"):
+		if c_shake_cool > 1.0:
 				c_shake = 0
 				c_shake_cool = 0.0
 

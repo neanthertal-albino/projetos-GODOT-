@@ -15,6 +15,7 @@ physics_layer_0/collision_mask = 3
 sources/0 = SubResource("TileSetAtlasSource_4dvvg")
 
 [node name="world" type="Node2D"]
+position = Vector2(1944, -904)
 metadata/_edit_horizontal_guides_ = [0.0]
 
 [node name="ColorRect" type="ColorRect" parent="."]
@@ -36,5 +37,5 @@ position = Vector2(589, 528)
 scale = Vector2(4, 4)
 
 [node name="player" parent="." instance=ExtResource("3_4vge2")]
-position = Vector2(160, 560)
+position = Vector2(240, 576)
 scale = Vector2(4, 4)
