@@ -109,7 +109,7 @@ func _move_basics():
 					elif stage_run == 1:
 						velocity.x += speed + 500
 					elif stage_run == 2:
-						velocity.x += speed + 800
+						velocity.x += speed + 1000
 				else:
 					velocity.x = speed
 		#se apertar S a velocidade para
