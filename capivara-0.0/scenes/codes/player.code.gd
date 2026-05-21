@@ -49,8 +49,6 @@ func _physics_process(_delta: float) -> void:
 		global_position = Vector2(160, 464)  # volta pro comeco
 		velocity = Vector2.ZERO  # zera velocidade pra evitar bug de queda
 	
-	print(stage_run)
-	
 	#aqui estao as funcoes que criei.
 	_plane()
 	
@@ -84,14 +82,11 @@ func _plane():
 	#ao apertar e presionar "W" e nao tiver contato com paredes, o eixo y do player tera 70 adicionado na queda.
 	#(faz planar)
 	if Input.is_key_pressed(KEY_W) and !is_on_wall():
-		velocity.y = 70
+		velocity.y = move_toward(velocity.y, 200, 20)
 		plan = true
-		#mas se apertar J e D o player irá planar mais rapidamente, ou seja. ele caira mais rapido.
-		if Input.is_key_pressed(KEY_J) and Input.is_key_pressed(KEY_D):
-			velocity.y = 150
-			#aqui tambem, só que pra esquerda. 
-		elif Input.is_key_pressed(KEY_J) and Input.is_key_pressed(KEY_A):
-			velocity.y = 150
+		#mas se apertar J e D o player irá planar mais rapidamente, ou seja. ele caira mais rapido. (vale pra esquerda tambem)
+		if Input.is_key_pressed(KEY_J) and Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_J) and Input.is_key_pressed(KEY_A):
+			velocity.y = move_toward(velocity.y, 150, 15)
 
 #esse aqui é a funcao "move basics" (que de basico nao tem nada).
 func _move_basics():
@@ -100,7 +95,6 @@ func _move_basics():
 		direcao = 0
 		if !Input.is_key_pressed(KEY_S):
 			if couldown_ass_power == 0:
-				velocity.x = speed
 				#isso só deixa o sprite do player pra direita.
 				$AnimatedSprite2D.flip_h = false
 				if is_on_floor():
@@ -108,42 +102,38 @@ func _move_basics():
 				#se apertar J junto e estiver no chao o player corre.
 				if Input.is_key_pressed(KEY_J):
 					if stage_run == 0: # estagios do 0 ao 2
-						velocity.x += move_toward(velocity.x, speed + 200, 20)
+						velocity.x = move_toward(velocity.x, speed + 400, 20)
 					elif stage_run == 1:
-						velocity.x += move_toward(velocity.x, speed + 500, 20)
+						velocity.x = move_toward(velocity.x, speed + 900, 60)
 					elif stage_run == 2:
-						velocity.x += move_toward(velocity.x, speed + 1000, 20)
+						velocity.x = move_toward(velocity.x, speed + 1300, 100)
 				else:
-					velocity.x = move_toward(velocity.x, 0, -10)
+					velocity.x = move_toward(velocity.x, speed, 50)
 		#se apertar S a velocidade para
 		else:
-			if velocity.x < 900:
-				velocity.x = 0
-			else:
-				velocity.x = 5
+			velocity.x = move_toward(velocity.x, 0, 40)
 	#isso é a mesa coisa, so q com o A (q dai é pra esquerda)
 	elif Input.is_key_pressed(KEY_A):
 		direcao = 1
 		if !Input.is_key_pressed(KEY_S):
 			if couldown_ass_power == 0:
-				velocity.x = -speed
 				$AnimatedSprite2D.flip_h = true
 				if is_on_floor():
 					$AnimatedSprite2D.play("walk")
 				if Input.is_key_pressed(KEY_J):
 					if stage_run == 0:
-						velocity.x += -speed - 200
+						velocity.x = move_toward(velocity.x, -speed - 400, 20)
 					elif stage_run == 1:
-						velocity.x += -speed - 500
+						velocity.x = move_toward(velocity.x, -speed - 900, 60)
 					elif stage_run == 2:
-						velocity.x += -speed - 1000
+						velocity.x = move_toward(velocity.x, -speed - 1300, 100)
 				else:
-					velocity.x = - speed
+					velocity.x = move_toward(velocity.x, -speed, 50)
 		else:
 			velocity.x = 0
 	#e se nem o D ou A for apertado, o eixo X é igual a 0 (o player para).
 	else:
-		velocity.x = 0
+		velocity.x = move_toward(velocity.x, 0, 40)
 
 #esse aqui é bem simples mesmo, ele faz o player deslizar, parar (S) e escalar a parede (se apertar J)                                                                                                                  (que agora eu nao sei o pq o player apenas deslisa mais devagar)
 func _slide_run_wall():
