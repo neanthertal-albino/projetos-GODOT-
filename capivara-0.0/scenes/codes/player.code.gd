@@ -22,6 +22,8 @@ var stage_run = 0 # estagios de velocidade da corrida (de 0 a 2)
 var conta_stage_run:int = 0 # tempo de cooldown entre os estagios
 var plan = false # verifica se o player planou
 var cont_vel_pstg = 0
+var direcao = 0
+var stop_run = 0.0
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
@@ -47,6 +49,8 @@ func _physics_process(_delta: float) -> void:
 		global_position = Vector2(160, 464)  # volta pro comeco
 		velocity = Vector2.ZERO  # zera velocidade pra evitar bug de queda
 	
+	print(stage_run)
+	
 	#aqui estao as funcoes que criei.
 	_plane()
 	
@@ -57,8 +61,6 @@ func _physics_process(_delta: float) -> void:
 	_ASS_POWER()
 	
 	_jump()
-	
-	_tim_meter(_delta)
 	
 	_tim_coyote(_delta)
 	
@@ -72,7 +74,7 @@ func _physics_process(_delta: float) -> void:
 	
 	cont_vel_pstgf()
 	
-	cooldown_run()
+	#cooldown_run()
 	
 	#esse aqui é apenas um "comando" que faz as coisas realmente acontecerem.
 	move_and_slide()
@@ -95,6 +97,7 @@ func _plane():
 func _move_basics():
 	#se apertar D e o "coldown_ass_power" for 0, o eixo x sera igual o valor da variavel speed (o palyer anda).
 	if Input.is_key_pressed(KEY_D):
+		direcao = 0
 		if !Input.is_key_pressed(KEY_S):
 			if couldown_ass_power == 0:
 				velocity.x = speed
@@ -105,18 +108,22 @@ func _move_basics():
 				#se apertar J junto e estiver no chao o player corre.
 				if Input.is_key_pressed(KEY_J):
 					if stage_run == 0: # estagios do 0 ao 2
-						velocity.x += speed + 200
+						velocity.x += move_toward(velocity.x, speed + 200, 20)
 					elif stage_run == 1:
-						velocity.x += speed + 500
+						velocity.x += move_toward(velocity.x, speed + 500, 20)
 					elif stage_run == 2:
-						velocity.x += speed + 1000
+						velocity.x += move_toward(velocity.x, speed + 1000, 20)
 				else:
-					velocity.x = speed
+					velocity.x = move_toward(velocity.x, speed, -10)
 		#se apertar S a velocidade para
 		else:
-			velocity.x = 0
+			if velocity.x < 900:
+				velocity.x = 0
+			else:
+				velocity.x = 5
 	#isso é a mesa coisa, so q com o A (q dai é pra esquerda)
 	elif Input.is_key_pressed(KEY_A):
+		direcao = 1
 		if !Input.is_key_pressed(KEY_S):
 			if couldown_ass_power == 0:
 				velocity.x = -speed
@@ -129,7 +136,7 @@ func _move_basics():
 					elif stage_run == 1:
 						velocity.x += -speed - 500
 					elif stage_run == 2:
-						velocity.x += -speed - 800
+						velocity.x += -speed - 1000
 				else:
 					velocity.x = - speed
 		else:
@@ -223,17 +230,7 @@ func _jump():
 				velocity.y += grav
 				
 
-#esse é o tim, de um "oi" pro tim >:], ele é um temporizador.
-func _tim_meter(_delta):
-	#se o player estiver no chao o tim fica 0
-	if is_on_floor():
-		tim_o_meter = 0
-	#dae se apertar K o tim comeca a contar 0.1
-	if Input.is_key_pressed(KEY_K):
-		tim_o_meter += 0.1
-	#se o tim chegar a 5 ou for maior o tim volta a ser 0
-	if tim_o_meter >= 5:
-		tim_o_meter = 0
+#esse era o tim, tim foi retirado...
 
 #esse é o coyote, infelismente ele nao fala... mas ainda vc pode dar um "oi" pra ele. :]
 func _tim_coyote(_delta):
@@ -258,13 +255,14 @@ func trigger_shake():
 
 func camera_shake(_delta):
 	#se nao tiver numa parede e nao tiver apertando K (resumidamente a camera chacoalha)
-	if !is_on_wall():
-		if  !Input.is_key_pressed(KEY_K):
-			if shake_strength > 0:
-				camera.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_strength
-				shake_strength = lerp(shake_strength, 0, _delta * 5)
-			else:
-				camera.offset = Vector2.ZERO
+	if stage_run == 0:
+		if !is_on_wall():
+			if !Input.is_key_pressed(KEY_K):
+				if shake_strength > 0:
+					camera.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_strength
+					shake_strength = lerp(shake_strength, 0, _delta * 5)
+				else:
+					camera.offset = Vector2.ZERO
 
 #ele é literalmente oq fala, ele pula das paredes.
 func jumpwall():
@@ -336,7 +334,8 @@ func velocity0():
 		conta_stage_run = 0
 		stage_run = 0
 
-func cooldown_run():
-	print('banana')
-	#if velocity.x > 900:
-		
+
+
+	# direcao 0 = player virado pra direita; direcao 1 = player virado pra esquerda
+	
+	
