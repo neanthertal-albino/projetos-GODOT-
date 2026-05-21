@@ -114,7 +114,7 @@ func _move_basics():
 					elif stage_run == 2:
 						velocity.x += move_toward(velocity.x, speed + 1000, 20)
 				else:
-					velocity.x = move_toward(velocity.x, speed, -10)
+					velocity.x = move_toward(velocity.x, 0, -10)
 		#se apertar S a velocidade para
 		else:
 			if velocity.x < 900:
