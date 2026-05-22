@@ -36,6 +36,10 @@ tile_set = SubResource("TileSet_rnjyy")
 position = Vector2(589, 528)
 scale = Vector2(4, 4)
 
+[node name="CharacterBody2D3" parent="." instance=ExtResource("3_rnjyy")]
+position = Vector2(3160, 552)
+scale = Vector2(4, 4)
+
 [node name="player" parent="." instance=ExtResource("3_4vge2")]
 position = Vector2(240, 576)
 scale = Vector2(4, 4)

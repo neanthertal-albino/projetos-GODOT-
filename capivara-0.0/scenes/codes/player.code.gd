@@ -23,6 +23,8 @@ var plan:bool = false # verifica se o player planou
 var cont_vel_pstg:float = 0.0
 var time_air:float = 0.0
 @onready var PORRADA = $AtackArea
+@onready var HELL_YEAH_FUCKING_ASS_POWER = $ASS_ASS_POWER
+@onready var ass_shape = $ASS_ASS_POWER/CollisionShape2D
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
@@ -54,7 +56,7 @@ func _physics_process(_delta: float) -> void:
 		velocity = Vector2.ZERO  # zera velocidade pra evitar bug de queda
 	
 	if $AnimatedSprite2D.flip_h:
-		PORRADA.position.x = -15
+		PORRADA.position.x = -20
 	else:
 		PORRADA.position.x = 1
 	
@@ -181,13 +183,13 @@ func _ASS_POWER():
 		c_shake_cool = 0.0
 	#se apertar S e NAO estiver no chao e NAO estiver apertando K o eixo y do player aumenta continuamente em 400.
 	#(que faz ele cair bem rapido)
-	if Input.is_action_pressed("ASS_POWER") and !is_on_floor() and !Input.is_action_pressed("jump") and c_shake >= 2:
+	if !is_on_floor() and !Input.is_action_pressed("jump") and c_shake >= 2:
 		if !is_on_wall():
 			velocity.y += 400
-			#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 3.0
-			ass_powered = true
+			#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 2.0
 			couldown_ass_power = 2.0
 			permetidor_shake = true
+			ass_powered = true
 	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.2
 	elif is_on_floor() and c_shake >= 2:
 		ass_powered = false
@@ -195,6 +197,10 @@ func _ASS_POWER():
 		shake_strength = 20
 		if permetidor_shake == true:
 			contador_shake += 0.1
+		
+		await get_tree().create_timer(0.2).timeout
+		
+		ass_powered = false
 		
 		#dai se chegar a 0 ou menos (o ou menos eu coloquei so pra garantir q ele pare de diminuir mesmo) fica = 0
 		if couldown_ass_power <= 0:
@@ -215,6 +221,17 @@ func _ASS_POWER():
 		if c_shake_cool > 1.0 and is_on_floor():
 			c_shake_cool = 0.0
 			c_shake = 0
+			
+	if ass_powered == true:
+		HELL_YEAH_FUCKING_ASS_POWER.monitoring = true
+		HELL_YEAH_FUCKING_ASS_POWER.monitorable = true
+		ass_shape.disabled = false
+
+		await get_tree().create_timer(0.2).timeout
+
+		HELL_YEAH_FUCKING_ASS_POWER.monitoring = false
+		HELL_YEAH_FUCKING_ASS_POWER.monitorable = false
+		ass_shape.disabled = true
 
 #essa funcao aqui faz o player pular, da pra ver q nao é tao simples por ter "apenas" 24 linhas de codigo, nao é? (sim, eu contei a linhas. [na verdade só diminui 30 por 52 mesmo e {diminui 1 (no final eu so copiei e colei no inicio mesmo)}, mas isso nao interessa, volta pro código!!! D:< ]).
 func _jump():
@@ -357,7 +374,7 @@ func violencia():
 	if Input.is_action_just_pressed("PORRADA"):
 		PORRADA.monitoring = true
 		PORRADA.monitorable = true
-		print(PORRADA.monitoring)
+		
 		await get_tree().create_timer(0.15).timeout
 		
 		PORRADA.monitoring = false
@@ -366,5 +383,8 @@ func violencia():
 func ready():
 	PORRADA.monitoring = false
 	PORRADA.monitorable = false
-	
 	PORRADA.disable_mode = true
+	
+	HELL_YEAH_FUCKING_ASS_POWER.monitoring = false
+	HELL_YEAH_FUCKING_ASS_POWER.monitorable = false
+	HELL_YEAH_FUCKING_ASS_POWER.disable_mode = true

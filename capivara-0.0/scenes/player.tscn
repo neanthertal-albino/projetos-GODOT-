@@ -1,10 +1,11 @@
-[gd_scene load_steps=29 format=3 uid="uid://byoene0cnq3du"]
+[gd_scene load_steps=31 format=3 uid="uid://byoene0cnq3du"]
 
 [ext_resource type="Texture2D" uid="uid://bnt5mha5vk0ck" path="res://sprites/Canie.png" id="1_g2els"]
-[ext_resource type="Script" uid="uid://bd06tnl13arye" path="res://scenes/codes/player.code.gd" id="1_qhqgy"]
+[ext_resource type="Script" uid="uid://bd06tnl13arye" path="res://scenes/codes/player.code.gd" id="1_qlg0r"]
 [ext_resource type="Texture2D" uid="uid://dxuv57onql6ch" path="res://sprites/Canie fall (2).png" id="2_qhqgy"]
 [ext_resource type="Texture2D" uid="uid://ysjva6of34bj" path="res://sprites/Canie-idle.png" id="4_dqkch"]
 [ext_resource type="Texture2D" uid="uid://4vxkmwqc5nsy" path="res://sprites/Canie-walktst2.png" id="5_qlg0r"]
+[ext_resource type="AudioStream" uid="uid://cqefivj5q5aa4" path="res://154684_DarKsidE555___Zero_Resurre.mp3" id="6_tuyoq"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qlg0r"]
 atlas = ExtResource("2_qhqgy")
@@ -176,11 +177,15 @@ animations = [{
 size = Vector2(8, 21)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qlg0r"]
-size = Vector2(8, 16)
+size = Vector2(15, 16)
 
-[node name="player" type="CharacterBody2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tuyoq"]
+size = Vector2(24, 8)
+
+[node name="player" type="CharacterBody2D" groups=["player"]]
+process_mode = 3
 position = Vector2(987, 76)
-script = ExtResource("1_qhqgy")
+script = ExtResource("1_qlg0r")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
@@ -204,6 +209,19 @@ collision_mask = 2
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AtackArea"]
-position = Vector2(8, 4)
+position = Vector2(11.5, 4)
 shape = SubResource("RectangleShape2D_qlg0r")
 debug_color = Color(1, 0.6, 0.69803923, 0.41960785)
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_tuyoq")
+autoplay = true
+
+[node name="ASS_ASS_POWER" type="Area2D" parent="." groups=["ASS_POWER"]]
+collision_layer = 4
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ASS_ASS_POWER"]
+position = Vector2(1, 12)
+shape = SubResource("RectangleShape2D_tuyoq")
+debug_color = Color(0.88235295, 0.9411765, 0.69803923, 0.41960785)

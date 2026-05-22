@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Capivara 2.1"
+config/name="Capivara 3"
 run/main_scene="uid://628negabdn6p"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://sprites/icon.svg"
@@ -26,6 +26,8 @@ window/stretch/aspect="ignore"
 [global_group]
 
 PORRADA_DO_PLAYER=""
+player=""
+ASS_POWER=""
 
 [input]
 
