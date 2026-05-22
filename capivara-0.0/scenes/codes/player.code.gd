@@ -51,8 +51,8 @@ func _physics_process(_delta: float) -> void:
 	if velocity.y >= 10000:
 		velocity.y = 10000
 		
-	if global_position.y > 1000:  # ou qualquer valor fundo do seu mapa
-		global_position = Vector2(160, 464)  # volta pro comeco
+	if global_position.y > 100:  # ou qualquer valor fundo do seu mapa
+		global_position = Vector2(-256, 2176)  # volta pro comeco
 		velocity = Vector2.ZERO  # zera velocidade pra evitar bug de queda
 	
 	if $AnimatedSprite2D.flip_h:
@@ -192,7 +192,7 @@ func _ASS_POWER():
 			ass_powered = true
 	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.2
 	elif is_on_floor() and c_shake >= 2:
-		ass_powered = false
+		ass_powered = true
 		couldown_ass_power -= 0.1
 		shake_strength = 20
 		if permetidor_shake == true:
@@ -328,9 +328,6 @@ func jumpwall():
 	#se o pode jumpwall for falso o contador rezeta.
 	if pode_jumpwall == false:
 		contador_jumpwall = 0
-
-# func _camera():
-	# theres nothing to the beta...
 	
 func _stage_run():
 	if cont_vel_pstg == 0:

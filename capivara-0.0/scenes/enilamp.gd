@@ -50,8 +50,6 @@ func contable():
 		tou_wall = 0
 
 func _on_hurtbox_area_entered(area: Area2D) -> void:
-	print(area.name)
-	print(area.get_groups())
 	if area == hurtbox:
 		return
 	if area.is_in_group("PORRADA_DO_PLAYER"):
@@ -84,21 +82,19 @@ func _on_hurtbox_area_entered(area: Area2D) -> void:
 
 
 func _on_hurtbox_area_entered_ASS_POWER(area: Area2D) -> void:
-	print(area.name)
 	if area == hurtbox:
 		return
 	if area.is_in_group("ASS_POWER"):
 		hp -= 5
-		print("ass_power acertou")
 		took_damage = true
 		player = get_tree().get_first_node_in_group("player")
 		
 		if player.global_position.x < global_position.x:
-			velocity.x = 1000
+			velocity.x = 400
 		else:
-			velocity.x = -1000
+			velocity.x = -400
 
-		velocity.y = -600
+		velocity.y = -300
 		
 		for i in range(4):
 			inimigo.modulate = Color(255.014, 255.014, 255.014, 1.0)
