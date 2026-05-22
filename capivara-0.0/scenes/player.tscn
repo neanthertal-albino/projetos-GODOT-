@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://byoene0cnq3du"]
+[gd_scene load_steps=29 format=3 uid="uid://byoene0cnq3du"]
 
 [ext_resource type="Texture2D" uid="uid://bnt5mha5vk0ck" path="res://sprites/Canie.png" id="1_g2els"]
 [ext_resource type="Script" uid="uid://bd06tnl13arye" path="res://scenes/codes/player.code.gd" id="1_qhqgy"]
@@ -173,10 +173,13 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dqkch"]
-size = Vector2(9, 21)
+size = Vector2(8, 21)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qlg0r"]
+size = Vector2(8, 16)
 
 [node name="player" type="CharacterBody2D"]
-position = Vector2(984, 76)
+position = Vector2(987, 76)
 script = ExtResource("1_qhqgy")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -186,8 +189,21 @@ animation = &"walk"
 frame_progress = 0.39720362
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0.5, 5.5)
+position = Vector2(1, 5.5)
 shape = SubResource("RectangleShape2D_dqkch")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-limit_left = 11
+limit_left = 0
+limit_bottom = 10
+limit_smoothed = true
+position_smoothing_enabled = true
+
+[node name="AtackArea" type="Area2D" parent="." groups=["PORRADA_DO_PLAYER"]]
+collision_layer = 4
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AtackArea"]
+position = Vector2(8, 4)
+shape = SubResource("RectangleShape2D_qlg0r")
+debug_color = Color(1, 0.6, 0.69803923, 0.41960785)

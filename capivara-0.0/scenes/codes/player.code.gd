@@ -17,12 +17,12 @@ var c_shake_cool:float = 0.0 # conta os milissegundos pra considerar double clic
 @onready var camera = $Camera2D  #é a camera
 var pode_jumpwall:bool = false  #ele permite se pode jumpwall ou nao
 var contador_jumpwall:float = 0.0  #ele conta por quanto tempo o jumpwall ficara verdadeiro.
-#var lookahead = 800  # distância à frente do player
-#var target_x = 0
 var stage_run:int = 0 # estagios de velocidade da corrida (de 0 a 2)
 var conta_stage_run:int = 0 # tempo de cooldown entre os estagios
 var plan:bool = false # verifica se o player planou
 var cont_vel_pstg:float = 0.0
+var time_air:float = 0.0
+@onready var PORRADA = $AtackArea
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
@@ -37,8 +37,13 @@ func _physics_process(_delta: float) -> void:
 		plan = false
 	#ja esse mostra se o player pulou ou nao. (tambem por ser muito curto deixei no func process).
 	if jumped == true:
+		time_air += 0.1
 		if is_on_floor():
 			jumped = false
+			time_air = 0
+	
+	if is_on_wall():
+		time_air = 0
 	
 	# Limita a velocidade vertical pra não explodir o pc
 	if velocity.y >= 10000:
@@ -48,7 +53,10 @@ func _physics_process(_delta: float) -> void:
 		global_position = Vector2(160, 464)  # volta pro comeco
 		velocity = Vector2.ZERO  # zera velocidade pra evitar bug de queda
 	
-	print(c_shake)
+	if $AnimatedSprite2D.flip_h:
+		PORRADA.position.x = -15
+	else:
+		PORRADA.position.x = 1
 	
 	#aqui estao as funcoes que criei.
 	_plane()
@@ -72,6 +80,12 @@ func _physics_process(_delta: float) -> void:
 	_stage_run()
 	
 	cont_vel_pstgf()
+	
+	camera_follow()
+	
+	violencia()
+	
+	ready()
 	
 	#esse aqui é apenas um "comando" que faz as coisas realmente acontecerem.
 	move_and_slide()
@@ -155,7 +169,6 @@ func _slide_run_wall():
 	
 #essa funcao aqui faz com q o player de um "ground pound" no chao, mas eu prefiro chamar de ass power mesmo.
 func _ASS_POWER():
-	print("cooldown ass power: ", c_shake_cool)
 	#isso aq conta quantas vezes a ação "ASS_POWER" foi apertada
 	if Input.is_action_just_pressed("ASS_POWER"):
 		c_shake += 1
@@ -211,7 +224,7 @@ func _jump():
 		if couldown_ass_power <= 0:
 			if Input.is_action_just_pressed("jump") and !Input.is_action_pressed("plan") and !Input.is_action_pressed("ASS_POWER"):
 				jumped = true
-				velocity.y -= 300
+				velocity.y -= 500
 	#se nao estiver em contato com o chao...
 	else:
 		#...e se o "jumped" for false e o tim_coyote for menor ou igual a 1, o eixo y diminue em 100 
@@ -245,7 +258,7 @@ func _tim_coyote(_delta):
 	if is_falling == true:
 		tim_coyote += 0.1
 		#se chegar ou for maior q 2 o eixo y é igual a grav (o player cai)
-		if tim_coyote >= 2:
+		if tim_coyote >= 1:
 			velocity.y += grav
 
 #esse aqui funciona bem simples se o contador shake for >= a 2, o permetidor fica falso. 
@@ -304,16 +317,16 @@ func jumpwall():
 	
 func _stage_run():
 	if cont_vel_pstg == 0:
-		if Input.is_action_pressed("RUN") and plan == false:
+		if Input.is_action_pressed("RUN") and plan == false and time_air <= 10:
 			conta_stage_run +=  1
-
+			
 			if conta_stage_run >= 150 and conta_stage_run < 350:
 				stage_run = 1
-
+				
 			elif conta_stage_run >= 600:
 				stage_run = 2
 				conta_stage_run = 600
-
+				
 		else:
 			conta_stage_run = 0
 			stage_run = 0
@@ -332,3 +345,26 @@ func cont_vel_pstgf():
 			cont_vel_pstg = 0
 	else:
 		cont_vel_pstg = 0
+
+func camera_follow():
+	camera.position.x = move_toward(
+		camera.position.x,
+		velocity.x * 0.1,
+		10
+	)
+	
+func violencia():
+	if Input.is_action_just_pressed("PORRADA"):
+		PORRADA.monitoring = true
+		PORRADA.monitorable = true
+		print(PORRADA.monitoring)
+		await get_tree().create_timer(0.15).timeout
+		
+		PORRADA.monitoring = false
+		PORRADA.monitorable = false
+		
+func ready():
+	PORRADA.monitoring = false
+	PORRADA.monitorable = false
+	
+	PORRADA.disable_mode = true
