@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://byoene0cnq3du"]
+[gd_scene load_steps=32 format=3 uid="uid://byoene0cnq3du"]
 
 [ext_resource type="Texture2D" uid="uid://bnt5mha5vk0ck" path="res://sprites/Canie.png" id="1_g2els"]
 [ext_resource type="Script" uid="uid://bd06tnl13arye" path="res://scenes/codes/player.code.gd" id="1_qlg0r"]
@@ -182,6 +182,9 @@ size = Vector2(15, 16)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tuyoq"]
 size = Vector2(24, 8)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fjrip"]
+size = Vector2(8, 25)
+
 [node name="player" type="CharacterBody2D" groups=["player"]]
 process_mode = 3
 position = Vector2(987, 76)
@@ -217,7 +220,6 @@ debug_color = Color(1, 0.6, 0.69803923, 0.41960785)
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("6_tuyoq")
-autoplay = true
 parameters/looping = true
 
 [node name="ASS_ASS_POWER" type="Area2D" parent="." groups=["ASS_POWER"]]
@@ -228,3 +230,12 @@ collision_mask = 2
 position = Vector2(1, 12)
 shape = SubResource("RectangleShape2D_tuyoq")
 debug_color = Color(0.88235295, 0.9411765, 0.69803923, 0.41960785)
+
+[node name="hurtbox" type="Area2D" parent="." groups=["dano_inimigo"]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="hurtbox"]
+position = Vector2(1, 1.5)
+shape = SubResource("RectangleShape2D_fjrip")
+debug_color = Color(0, 0, 0, 0.41960785)
+
+[connection signal="area_entered" from="hurtbox" to="." method="_player_buxa_levou_dano"]

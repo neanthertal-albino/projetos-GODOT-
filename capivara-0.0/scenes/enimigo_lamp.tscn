@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://b3jbtsaf36ro0"]
+[gd_scene load_steps=15 format=3 uid="uid://b3jbtsaf36ro0"]
 
 [ext_resource type="Script" uid="uid://ci0wvf0herplk" path="res://scenes/enilamp.gd" id="1_pnctg"]
 [ext_resource type="Texture2D" uid="uid://b268m7st6ofcv" path="res://New Piskel (1).png" id="2_pnctg"]
@@ -78,6 +78,9 @@ size = Vector2(7, 17)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pnctg"]
 size = Vector2(8, 17)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_drjn2"]
+size = Vector2(11, 13)
+
 [node name="CharacterBody2D" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 2
@@ -102,6 +105,13 @@ collision_mask = 4
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
 position = Vector2(0, 2.5)
 shape = SubResource("RectangleShape2D_pnctg")
+
+[node name="hitbox" type="Area2D" parent="." groups=["dano_inimigo"]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="hitbox"]
+position = Vector2(-10, 0)
+shape = SubResource("RectangleShape2D_drjn2")
+debug_color = Color(1, 0, 0, 0.41960785)
 
 [connection signal="area_entered" from="Hurtbox" to="." method="_on_hurtbox_area_entered_ASS_POWER"]
 [connection signal="area_entered" from="Hurtbox" to="." method="_on_hurtbox_area_entered"]

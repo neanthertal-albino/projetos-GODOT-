@@ -25,12 +25,12 @@ var time_air:float = 0.0
 @onready var PORRADA = $AtackArea
 @onready var HELL_YEAH_FUCKING_ASS_POWER = $ASS_ASS_POWER
 @onready var ass_shape = $ASS_ASS_POWER/CollisionShape2D
-#var cool_perm_porrada:bool = true
 var cool_porrada:float = 0.0
+var hp:int = 10
+var levou_damage:bool = false
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
-	print(cool_porrada)
 	if is_on_floor() and !Input.is_action_pressed("walk_left") and !Input.is_action_pressed("walk_right"):
 		$AnimatedSprite2D.play("idle")
 	#isso apenas mostra se o player está caindo ou nao, por ser tão curto eu deixei no proprio func process mesmo.
@@ -62,6 +62,9 @@ func _physics_process(_delta: float) -> void:
 		PORRADA.position.x = -20
 	else:
 		PORRADA.position.x = 1
+		
+	if cool_porrada > 0:
+		cool_porrada -= _delta
 	
 	#aqui estao as funcoes que criei.
 	_plane()
@@ -100,11 +103,11 @@ func _plane():
 	#ao apertar e presionar "W" e nao tiver contato com paredes, o eixo y do player tera 70 adicionado na queda.
 	#(faz planar)
 	if Input.is_action_pressed("plan") and !is_on_wall():
-		velocity.y = 50
+		velocity.y = move_toward(velocity.y, 150, 30)
 		plan = true
 		#mas se apertar J e D o player irá planar mais rapidamente, ou seja. ele caira mais rapido. (vale pra esquerda tambem)
 		if Input.is_action_pressed("RUN") and Input.is_action_pressed("walk_left") or Input.is_action_pressed("RUN") and Input.is_action_pressed("walk_right"):
-			velocity.y = move_toward(velocity.y, 150, 15)
+			velocity.y = move_toward(velocity.y, 50, 15)
 
 #esse aqui é a funcao "move basics" (que de basico nao tem nada).
 func _move_basics():
@@ -193,7 +196,7 @@ func _ASS_POWER():
 			couldown_ass_power = 2.0
 			permetidor_shake = true
 			ass_powered = true
-	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.2
+	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.1
 	elif is_on_floor() and c_shake >= 2:
 		ass_powered = true
 		couldown_ass_power -= 0.1
@@ -371,33 +374,24 @@ func camera_follow():
 	)
 	
 func violencia():
-	if cool_porrada >= 0.0 and cool_porrada <= 4:
-		if Input.is_action_just_pressed("PORRADA"):
-			cool_porrada += 4
-			PORRADA.monitoring = true
-			PORRADA.monitorable = true
-			
-			if Input.is_action_pressed("walk_right"):
-				if Input.is_action_pressed("RUN"):
-					velocity.x += 700
-				else:
-					velocity.x += 800
-			
-			elif Input.is_action_pressed("walk_left"):
-				if Input.is_action_pressed("RUN"):
-					velocity.x += -700
-				else:
-					velocity.x += -800
-			
-			await get_tree().create_timer(0.15).timeout
-			
-			PORRADA.monitoring = false
-			PORRADA.monitorable = false
-	
-	elif cool_porrada >= 4:
-		while cool_porrada != 0:
-			cool_porrada -= 0.1
+	if Input.is_action_just_pressed("PORRADA") and cool_porrada <= 0:
 		
+		cool_porrada = 0.5
+		
+		PORRADA.monitoring = true
+		PORRADA.monitorable = true
+		
+		if Input.is_action_pressed("walk_right"):
+				velocity.x += 800
+		
+		elif Input.is_action_pressed("walk_left"):
+				velocity.x += -800
+		
+		await get_tree().create_timer(0.15).timeout
+		
+		PORRADA.monitoring = false
+		PORRADA.monitorable = false
+			
 		
 func ready():
 	PORRADA.monitoring = false
@@ -407,3 +401,30 @@ func ready():
 	HELL_YEAH_FUCKING_ASS_POWER.monitoring = false
 	HELL_YEAH_FUCKING_ASS_POWER.monitorable = false
 	HELL_YEAH_FUCKING_ASS_POWER.disable_mode = true
+
+
+func _player_buxa_levou_dano(area: Area2D) -> void:
+	
+	if area.is_in_group("dano_inimigo"):
+		
+		if levou_damage:
+			return
+		
+		levou_damage = true
+		
+		hp -= 1
+		
+		print("hp: ", hp)
+		
+		$AnimatedSprite2D.modulate = Color(1,0.3,0.3)
+		
+		await get_tree().create_timer(0.1).timeout
+		
+		$AnimatedSprite2D.modulate = Color(1,1,1)
+		
+		await get_tree().create_timer(1.0).timeout
+		
+		if hp <= 0:
+			queue_free()
+		
+		levou_damage = false

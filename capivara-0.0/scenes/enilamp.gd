@@ -9,8 +9,9 @@ var hp = 30
 var took_damage = false
 var player = 0
 @onready var inimigo = $AnimatedSprite2D
+@onready var hitbox = $hitbox
+
 func _process(_delta: float) -> void:
-	
 	walk()
 	
 	grav_eni()
@@ -18,6 +19,10 @@ func _process(_delta: float) -> void:
 	contable()
 	
 	move_and_slide()
+	
+	hitbox.monitoring = true
+	hitbox.monitorable = true
+
 
 func walk():
 	if took_damage:
@@ -78,8 +83,6 @@ func _on_hurtbox_area_entered(area: Area2D) -> void:
 		if hp <= 0:
 			queue_free()
 		
-		
-
 
 func _on_hurtbox_area_entered_ASS_POWER(area: Area2D) -> void:
 	if area == hurtbox:
@@ -108,3 +111,6 @@ func _on_hurtbox_area_entered_ASS_POWER(area: Area2D) -> void:
 		
 		if hp <= 0:
 			queue_free()
+
+
+	
