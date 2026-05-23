@@ -199,8 +199,8 @@ shape = SubResource("RectangleShape2D_dqkch")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 ignore_rotation = false
-limit_left = -10
-limit_bottom = 1000
+limit_left = 0
+limit_bottom = 0
 limit_smoothed = true
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0

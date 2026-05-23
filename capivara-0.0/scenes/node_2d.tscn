@@ -15,7 +15,7 @@ physics_layer_0/collision_mask = 3
 sources/0 = SubResource("TileSetAtlasSource_4dvvg")
 
 [node name="world" type="Node2D"]
-position = Vector2(1944, -904)
+position = Vector2(-8, -768)
 metadata/_edit_horizontal_guides_ = [0.0]
 
 [node name="ColorRect" type="ColorRect" parent="."]
@@ -24,6 +24,7 @@ offset_top = -8.0
 offset_right = 1176.0
 offset_bottom = 640.0
 color = Color(0.211765, 0.239216, 0.321569, 1)
+metadata/_edit_use_anchors_ = true
 
 [node name="TileMap" type="TileMapLayer" parent="."]
 texture_filter = 1

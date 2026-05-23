@@ -25,9 +25,12 @@ var time_air:float = 0.0
 @onready var PORRADA = $AtackArea
 @onready var HELL_YEAH_FUCKING_ASS_POWER = $ASS_ASS_POWER
 @onready var ass_shape = $ASS_ASS_POWER/CollisionShape2D
+#var cool_perm_porrada:bool = true
+var cool_porrada:float = 0.0
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
+	print(cool_porrada)
 	if is_on_floor() and !Input.is_action_pressed("walk_left") and !Input.is_action_pressed("walk_right"):
 		$AnimatedSprite2D.play("idle")
 	#isso apenas mostra se o player está caindo ou nao, por ser tão curto eu deixei no proprio func process mesmo.
@@ -52,7 +55,7 @@ func _physics_process(_delta: float) -> void:
 		velocity.y = 10000
 		
 	if global_position.y > 100:  # ou qualquer valor fundo do seu mapa
-		global_position = Vector2(-256, 2176)  # volta pro comeco
+		global_position = Vector2(10, 10)  # volta pro comeco
 		velocity = Vector2.ZERO  # zera velocidade pra evitar bug de queda
 	
 	if $AnimatedSprite2D.flip_h:
@@ -364,18 +367,37 @@ func camera_follow():
 	camera.position.x = move_toward(
 		camera.position.x,
 		velocity.x * 0.1,
-		10
+		15
 	)
 	
 func violencia():
-	if Input.is_action_just_pressed("PORRADA"):
-		PORRADA.monitoring = true
-		PORRADA.monitorable = true
+	if cool_porrada >= 0.0 and cool_porrada <= 4:
+		if Input.is_action_just_pressed("PORRADA"):
+			cool_porrada += 4
+			PORRADA.monitoring = true
+			PORRADA.monitorable = true
+			
+			if Input.is_action_pressed("walk_right"):
+				if Input.is_action_pressed("RUN"):
+					velocity.x += 700
+				else:
+					velocity.x += 800
+			
+			elif Input.is_action_pressed("walk_left"):
+				if Input.is_action_pressed("RUN"):
+					velocity.x += -700
+				else:
+					velocity.x += -800
+			
+			await get_tree().create_timer(0.15).timeout
+			
+			PORRADA.monitoring = false
+			PORRADA.monitorable = false
+	
+	elif cool_porrada >= 4:
+		while cool_porrada != 0:
+			cool_porrada -= 0.1
 		
-		await get_tree().create_timer(0.15).timeout
-		
-		PORRADA.monitoring = false
-		PORRADA.monitorable = false
 		
 func ready():
 	PORRADA.monitoring = false
