@@ -1,11 +1,11 @@
 extends Node2D
 
+@onready var line = $Line2D
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+func _ready():
 
+	line.width = 20
+	line.default_color = Color.RED
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	print('socorro')
+	line.add_point(Vector2(0,0))
+	line.add_point(Vector2(300,0))
