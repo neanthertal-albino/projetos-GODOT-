@@ -244,5 +244,6 @@ scale = Vector2(1.1, 1.1)
 script = ExtResource("7_fjrip")
 
 [node name="Line2D" type="Line2D" parent="Node2D"]
+use_parent_material = true
 
 [connection signal="area_entered" from="hurtbox" to="." method="_player_buxa_levou_dano"]
