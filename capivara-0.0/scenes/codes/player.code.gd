@@ -28,27 +28,34 @@ var time_air:float = 0.0
 var cool_porrada:float = 0.0
 var hp:int = 10
 var levou_damage:bool = false
+var states:String = 'idle'
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
+	print(states)
 	if is_on_floor() and !Input.is_action_pressed("walk_left") and !Input.is_action_pressed("walk_right"):
 		$AnimatedSprite2D.play("idle")
+		states = 'idle'
 	#isso apenas mostra se o player está caindo ou nao, por ser tão curto eu deixei no proprio func process mesmo.
 	if !is_on_floor():
 		is_falling = true
 		$AnimatedSprite2D.play("falll")
+		states = 'falling'
 	else:
 		is_falling = false
 		plan = false
 	#ja esse mostra se o player pulou ou nao. (tambem por ser muito curto deixei no func process).
 	if jumped == true:
-		time_air += 0.1
+		time_air += _delta
 		if is_on_floor():
 			jumped = false
 			time_air = 0
 	
 	if is_on_wall():
 		time_air = 0
+		states = 'on_wall'
+		if Input.is_action_pressed("RUN"):
+			states = 'running_on_wall'
 	
 	# Limita a velocidade vertical pra não explodir o pc
 	if velocity.y >= 10000:
@@ -65,6 +72,8 @@ func _physics_process(_delta: float) -> void:
 		
 	if cool_porrada > 0:
 		cool_porrada -= _delta
+		
+	
 	
 	#aqui estao as funcoes que criei.
 	_plane()
@@ -108,11 +117,14 @@ func _plane():
 		#mas se apertar J e D o player irá planar mais rapidamente, ou seja. ele caira mais rapido. (vale pra esquerda tambem)
 		if Input.is_action_pressed("RUN") and Input.is_action_pressed("walk_left") or Input.is_action_pressed("RUN") and Input.is_action_pressed("walk_right"):
 			velocity.y = move_toward(velocity.y, 50, 15)
+		states = 'planning'
 
 #esse aqui é a funcao "move basics" (que de basico nao tem nada).
 func _move_basics():
 	#se apertar D e o "coldown_ass_power" for 0, o eixo x sera igual o valor da variavel speed (o palyer anda).
 	if Input.is_action_pressed("walk_right"):
+		if !is_on_wall():
+			states = 'walking'
 		if c_shake <= 1:
 			if couldown_ass_power == 0:
 				#isso só deixa o sprite do player pra direita.
@@ -121,6 +133,8 @@ func _move_basics():
 					$AnimatedSprite2D.play("walk")
 				#se apertar J junto e estiver no chao o player corre.
 				if Input.is_action_pressed("RUN"):
+					if !is_on_wall():
+						states = 'running'
 					if stage_run == 0: # estagios do 0 ao 2
 						velocity.x = move_toward(velocity.x, speed + 400, 20)
 					elif stage_run == 1:
@@ -134,12 +148,16 @@ func _move_basics():
 			velocity.x = move_toward(velocity.x, 0, 40)
 	#isso é a mesa coisa, so q com o A (q dai é pra esquerda)
 	elif Input.is_action_pressed("walk_left"):
+		if !is_on_wall():
+			states = 'walking'
 		if c_shake <= 1:
 			if couldown_ass_power == 0:
 				$AnimatedSprite2D.flip_h = true
 				if is_on_floor():
 					$AnimatedSprite2D.play("walk")
 				if Input.is_action_pressed("RUN"):
+					if !is_on_wall():
+						states = 'running'
 					if stage_run == 0:
 						velocity.x = move_toward(velocity.x, -speed - 400, 20)
 					elif stage_run == 1:
@@ -177,32 +195,71 @@ func _slide_run_wall():
 	
 #essa funcao aqui faz com q o player de um "ground pound" no chao, mas eu prefiro chamar de ass power mesmo.
 func _ASS_POWER():
-	#isso aq conta quantas vezes a ação "ASS_POWER" foi apertada
+	_click_ass_power()
+	_dar_ass_power()
+	_forca_ass_power()
+	
+	if ass_powered:
+		HELL_YEAH_FUCKING_ASS_POWER.monitoring = true
+		HELL_YEAH_FUCKING_ASS_POWER.monitorable = true
+		ass_shape.disabled = false
+		
+		await get_tree().create_timer(0.2).timeout
+		
+		HELL_YEAH_FUCKING_ASS_POWER.monitoring = false
+		HELL_YEAH_FUCKING_ASS_POWER.monitorable = false
+		ass_shape.disabled = true
+
+func _click_ass_power():
+		#isso aq conta quantas vezes a ação "ASS_POWER" foi apertada
 	if Input.is_action_just_pressed("ASS_POWER"):
 		c_shake += 1
+		if c_shake >= 2:
+			c_shake = 2
 	
-	elif c_shake > 0:
+	if c_shake > 0:
 		c_shake_cool += 0.1
 	
-	elif c_shake_cool >= 1.0:
+	if c_shake_cool >= 1.0:
 		c_shake = 0
 		c_shake_cool = 0.0
-	#se apertar S e NAO estiver no chao e NAO estiver apertando K o eixo y do player aumenta continuamente em 400.
+		
+
+func _dar_ass_power():
+	#se apertar S e NAO estiver no chao e NAO estiver apertando jump o eixo y do player aumenta continuamente em 400.
 	#(que faz ele cair bem rapido)
-	if !is_on_floor() and !Input.is_action_pressed("jump") and c_shake >= 2:
-		if !is_on_wall():
-			velocity.y += 400
-			#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 2.0
-			couldown_ass_power = 2.0
-			permetidor_shake = true
-			ass_powered = true
-	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.1
-	elif is_on_floor() and c_shake >= 2:
+	var can_ass_power = (
+		!is_on_floor() and
+		!Input.is_action_pressed("jump") and
+		c_shake >= 2 and
+		!is_on_wall()
+	)
+	
+	if can_ass_power:
+		velocity.y += 400
+		#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 2.0
+		couldown_ass_power = 2.0
+		permetidor_shake = true
 		ass_powered = true
+		
+	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.1
+	elif ass_powered == true:
 		couldown_ass_power -= 0.1
+		states = 'ass_power'
+	
+	#se nenhum desses dois acontecer e apertar S mesmo assim o couldown fica = 0
+	else:
+		if !Input.is_action_pressed("ASS_POWER"):
+			couldown_ass_power = 0
+			if c_shake_cool > 1.0:
+				c_shake = 0
+				c_shake_cool = 0.0
+				
+
+func _forca_ass_power():
+	if is_on_floor() and ass_powered:
 		shake_strength = 20
-		if permetidor_shake == true:
-			contador_shake += 0.1
+		contador_shake += 0.1
 		
 		await get_tree().create_timer(0.2).timeout
 		
@@ -211,33 +268,15 @@ func _ASS_POWER():
 		#dai se chegar a 0 ou menos (o ou menos eu coloquei so pra garantir q ele pare de diminuir mesmo) fica = 0
 		if couldown_ass_power <= 0:
 			couldown_ass_power = 0
-	#se nenhum desses dois acontecer e apertar S mesmo assim o couldown fica = 0
-	else:
-		if !Input.is_action_pressed("ASS_POWER"):
-			couldown_ass_power = 0
-			if c_shake_cool > 1.0:
-				c_shake = 0
-				c_shake_cool = 0.0
 	
 	if !Input.is_action_pressed("ASS_POWER"):
-		if c_shake_cool > 1.0:
+		if c_shake_cool >= 2.0:
 				c_shake = 0
 				c_shake_cool = 0.0
 	else:
 		if c_shake_cool > 1.0 and is_on_floor():
 			c_shake_cool = 0.0
 			c_shake = 0
-			
-	if ass_powered == true:
-		HELL_YEAH_FUCKING_ASS_POWER.monitoring = true
-		HELL_YEAH_FUCKING_ASS_POWER.monitorable = true
-		ass_shape.disabled = false
-
-		await get_tree().create_timer(0.2).timeout
-
-		HELL_YEAH_FUCKING_ASS_POWER.monitoring = false
-		HELL_YEAH_FUCKING_ASS_POWER.monitorable = false
-		ass_shape.disabled = true
 
 #essa funcao aqui faz o player pular, da pra ver q nao é tao simples por ter "apenas" 24 linhas de codigo, nao é? (sim, eu contei a linhas. [na verdade só diminui 30 por 52 mesmo e {diminui 1 (no final eu so copiei e colei no inicio mesmo)}, mas isso nao interessa, volta pro código!!! D:< ]).
 func _jump():
@@ -372,10 +411,11 @@ func camera_follow():
 		velocity.x * 0.1,
 		15
 	)
+
 	
 func violencia():
 	if Input.is_action_just_pressed("PORRADA") and cool_porrada <= 0:
-		
+		states = 'porrada'
 		cool_porrada = 0.5
 		
 		PORRADA.monitoring = true
@@ -404,7 +444,7 @@ func ready():
 
 
 func _player_buxa_levou_dano(area: Area2D) -> void:
-	
+	states = 'machucadinho'
 	if area.is_in_group("dano_inimigo"):
 		
 		if levou_damage:
