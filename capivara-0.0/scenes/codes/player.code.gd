@@ -7,11 +7,10 @@ var tim_coyote:float = 0.0  #tim_coyote: ele é basicamente o mesmo q o "tim_o_m
 var is_falling:bool = false  #is_falling: isso apenas mostra pro código se o player pulou ou nao
 var jumped:bool = false  #jumped: mesma coisa do "falling", só q ele mostra se o player pulou.
 var ass_powered:bool = false  #ass_powered: mostra se o player deu um "ASS POWER!!!".
-var couldown_ass_power:float = 5.0  #couldown_ass_power: ele é o tempo em q o player fica parado após o "ASS POWER!!!".
+var couldown_ass_power:float = 2.0  #couldown_ass_power: ele é o tempo em q o player fica parado após o "ASS POWER!!!".
 var shake_strength:int = 0  #forca do shake (shake = tremer pros bot dos ingreis haha)
 var contador_shake:float = 0.0  #conta quando o shake pode ou nao acontecer
 var permetidor_shake:bool = false  #permite ou nao o contador shake contar
-var rezet_shake:bool = false   #rezeta o contador shake
 var c_shake:int = 0 # conta o quantas vezes o botão pra efetuar o ass_power foi apertado
 var c_shake_cool:float = 0.0 # conta os milissegundos pra considerar double click
 @onready var camera = $Camera2D  #é a camera
@@ -32,7 +31,6 @@ var states:String = 'idle'
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
-	print(states)
 	if is_on_floor() and !Input.is_action_pressed("walk_left") and !Input.is_action_pressed("walk_right"):
 		$AnimatedSprite2D.play("idle")
 	#isso apenas mostra se o player está caindo ou nao, por ser tão curto eu deixei no proprio func process mesmo.
@@ -93,7 +91,7 @@ func _physics_process(_delta: float) -> void:
 	
 	cont_vel_pstgf(_delta)
 	
-	camera_follow(_delta)
+	camera_follow()
 	
 	violencia()
 	
@@ -181,49 +179,9 @@ func _slide_run_wall():
 	
 #essa funcao aqui faz com q o player de um "ground pound" no chao, mas eu prefiro chamar de ass power mesmo.
 func _ASS_POWER(delta):
-	#isso aq conta quantas vezes a ação "ASS_POWER" foi apertada
-	if Input.is_action_just_pressed("ASS_POWER"):
-		c_shake += delta
-		if c_shake >= 2:
-			c_shake = 2
-	
-	if c_shake > 0:
-		c_shake_cool += delta
-	
-	if c_shake_cool >= 1.0:
-		c_shake = 0
-		c_shake_cool = 0.0
-		
-	#se apertar S e NAO estiver no chao e NAO estiver apertando jump o eixo y do player aumenta continuamente em 400.
-	#(que faz ele cair bem rapido)
-	var can_ass_power = (
-		!is_on_floor() and
-		!Input.is_action_pressed("jump") and
-		c_shake >= 2 and
-		!is_on_wall()
-	)
-	
-	if can_ass_power:
-		velocity.y += 400
-		#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha) e o couldown fica igual a 2.0
-		couldown_ass_power = 2.0
-		permetidor_shake = true
-		ass_powered = true
-		
-	#e se tiver chego no chao o powered fica false ("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.1
-	elif ass_powered == true:
-		couldown_ass_power -= 0.1
-		states = 'ass_power'
-	
-	#se nenhum desses dois acontecer e apertar S mesmo assim o couldown fica = 0
-	else:
-		if !Input.is_action_pressed("ASS_POWER"):
-			couldown_ass_power = 0
-			if c_shake_cool > 1.0:
-				c_shake = 0
-				c_shake_cool = 0.0
-		
-	_forca_ass_power()
+	_ass_click(delta)
+	_ass_power_forca(delta)
+	_ass_power_action(delta)
 	
 	if ass_powered:
 		HELL_YEAH_FUCKING_ASS_POWER.monitoring = true
@@ -237,12 +195,55 @@ func _ASS_POWER(delta):
 		ass_shape.disabled = true
 		
 
-				
+func _ass_click(delta):
+	#isso aq conta quantas vezes a ação "ASS_POWER" foi apertada
+	if Input.is_action_just_pressed("ASS_POWER"):
+		c_shake += 1
+		if c_shake >= 2:
+			c_shake = 2
+	
+	#se for maior q 0 quer dizer q foi apertado, ajuda pra rezetar se n for do desejo do player dar ass_power
+	if c_shake > 0:
+		c_shake_cool += delta
+	
+	if c_shake_cool >= 1.0:
+		c_shake = 0
+		c_shake_cool = 0.0
 
-func _forca_ass_power():
+func _ass_power_action(delta):
+	#se apertar S e NAO estiver no chao e NAO estiver apertando jump o eixo y do player aumenta continuamente em 400.
+	#(que faz ele cair bem rapido)
+	var can_ass_power = (
+		!is_on_floor() and
+		!Input.is_action_pressed("jump") and
+		c_shake >= 2 and
+		!is_on_wall()
+	)
+	
+	if can_ass_power:
+		velocity.y += 400
+		#e dai o "ass_powered" fica igual a true ("verdadeiro" pros nao bilingue, haha)
+		permetidor_shake = true
+		ass_powered = true
+		
+	#e se tiver chego no chao, o powered fica false após um tempo("falso" pros !bilingue, ha) e o contador comeca a diminuir 0.1
+	elif ass_powered:
+		couldown_ass_power -= delta
+		if couldown_ass_power <= 0:
+			ass_powered = false
+	
+	#se nenhum desses dois acontecer e apertar S mesmo assim o couldown fica = 0
+	else:
+		if !Input.is_action_pressed("ASS_POWER"):
+			couldown_ass_power = 0
+			if c_shake_cool > 1.0:
+				c_shake = 0
+				c_shake_cool = 0.0
+
+func _ass_power_forca(delta):
 	if is_on_floor() and ass_powered:
 		shake_strength = 20
-		contador_shake += 0.1
+		contador_shake += delta
 		
 		await get_tree().create_timer(0.2).timeout
 		
@@ -292,7 +293,7 @@ func _jump():
 				velocity.y += grav
 				
 
-#esse era o tim, tim foi retirado...
+#esse era o tim, tim foi retirado, vcs achariam legal um pulo q ficava indo maior e depois menor? acho q nao...
 
 #esse é o coyote, infelismente ele nao fala... mas ainda vc pode dar um "oi" pra ele. :]
 func _tim_coyote(_delta):
@@ -301,7 +302,7 @@ func _tim_coyote(_delta):
 		tim_coyote = 0
 	#se is_falling for = true (o player estiver caindo) o coyote comeca a contar 0.1
 	if is_falling == true:
-		tim_coyote += 0.1
+		tim_coyote += _delta
 		#se chegar ou for maior q 2 o eixo y é igual a grav (o player cai)
 		if tim_coyote >= 1:
 			velocity.y += grav
@@ -315,6 +316,7 @@ func trigger_shake():
 		contador_shake = 0
 		shake_strength = 0
 
+# faz a camera chacoalhar quando o ASS_POWER for usado
 func camera_shake(_delta):
 	#se nao tiver numa parede e nao tiver apertando K (resumidamente a camera chacoalha)
 	if stage_run == 0:
@@ -388,22 +390,13 @@ func cont_vel_pstgf(delta):
 	else:
 		cont_vel_pstg = 0
 
-func camera_follow(delta):
+func camera_follow():
 	camera.position.x = move_toward(
 		camera.position.x,
 		velocity.x * 0.1,
 		15
 	)
-	
-	#camera.zoom = camera.zoom.lerp(
-	#Vector2(
-		#1.0 + velocity.x * 0.3,
-		#1.0 + velocity.x * 0.3
-	#),
-	#5 * delta
-	#)
 
-	
 func violencia():
 	if Input.is_action_just_pressed("PORRADA") and cool_porrada <= 0:
 		cool_porrada = 0.5
