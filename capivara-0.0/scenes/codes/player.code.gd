@@ -27,7 +27,13 @@ var time_air:float = 0.0
 var cool_porrada:float = 0.0
 var hp:int = 10
 var levou_damage:bool = false
-var states:String = 'idle'
+enum state {
+	IDLE,
+	WALKING,
+	RUN,
+	JUMPING,
+	
+}
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
