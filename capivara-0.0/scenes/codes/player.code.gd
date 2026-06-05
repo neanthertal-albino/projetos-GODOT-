@@ -27,16 +27,28 @@ var time_air:float = 0.0
 var cool_porrada:float = 0.0
 var hp:int = 10
 var levou_damage:bool = false
-enum state {
+enum State {
 	IDLE,
 	WALKING,
-	RUN,
+	RUN_1,
+	RUN_2,
+	RUN_3,
 	JUMPING,
-	
+	FALLING,
+	PLANNING,
+	ASS_POWER,
+	MACHUCADINHO,
+	WALL_SLIDE,
+	WALL_RUN,
+	VIOLENCIA
 }
+
+var state_atu = State.IDLE
 
 #o "func _physics_process(_delta):" roda tudo oque tiver nele 60 vezes por segundo (muita coisa né?) 
 func _physics_process(_delta: float) -> void:
+	print(state_atu)
+	
 	if is_on_floor() and !Input.is_action_pressed("walk_left") and !Input.is_action_pressed("walk_right"):
 		$AnimatedSprite2D.play("idle")
 	#isso apenas mostra se o player está caindo ou nao, por ser tão curto eu deixei no proprio func process mesmo.
@@ -71,8 +83,6 @@ func _physics_process(_delta: float) -> void:
 		
 	if cool_porrada > 0:
 		cool_porrada -= _delta
-		
-	
 	
 	#aqui estao as funcoes que criei.
 	_plane()
@@ -102,6 +112,8 @@ func _physics_process(_delta: float) -> void:
 	violencia()
 	
 	_ready()
+	
+	_state_machine()
 	
 	#esse aqui é apenas um "comando" que faz as coisas realmente acontecerem.
 	move_and_slide()
@@ -283,7 +295,7 @@ func _jump():
 		if jumped == false:
 			if tim_coyote <= 2:
 				if Input.is_action_just_pressed("jump"):
-					velocity.y -= 80
+					velocity.y -= 200
 		#e se nao (q dai o jumped for true) o eixo y aumenta igual o valor de grav (o player cai)
 		else:
 			velocity.y += grav
@@ -343,10 +355,8 @@ func jumpwall(delta):
 	if pode_jumpwall == true:
 		#ele da um (pulo do ar)
 		if Input.is_action_pressed("jump") and !is_on_wall():
-			velocity.y -= 150
-			#e se nao estiver na parede o contador jumpwall comeca a contar.
-			if !is_on_wall():
-				contador_jumpwall += delta
+			velocity.y -= 500
+			contador_jumpwall += delta
 			#se aperta A durante tudo isso o player dara uma investida pra esquerda.
 			if Input.is_action_pressed("walk_left"):
 				velocity.x += -40
@@ -358,8 +368,8 @@ func jumpwall(delta):
 	#se estiver o chao o pode jumpwall fica falso
 	if is_on_floor():
 		pode_jumpwall = false
-	#se o contador for maior q 0.5 o pode jumpwall fica falso
-	if contador_jumpwall >= 1:
+	#se o contador for maior q 0.2 o pode jumpwall fica falso
+	if contador_jumpwall >= 0.06:
 		pode_jumpwall = false
 	#se o pode jumpwall for falso o contador rezeta.
 	if pode_jumpwall == false:
@@ -442,8 +452,6 @@ func _player_buxa_levou_dano(area: Area2D) -> void:
 		
 		hp -= 1
 		
-		print("hp: ", hp)
-		
 		$AnimatedSprite2D.modulate = Color(1,0.3,0.3)
 		
 		await get_tree().create_timer(0.1).timeout
@@ -456,3 +464,43 @@ func _player_buxa_levou_dano(area: Area2D) -> void:
 			queue_free()
 		
 		levou_damage = false
+
+func _state_machine():
+	if levou_damage:
+		state_atu = State.MACHUCADINHO
+	
+	elif ass_powered:
+		state_atu = State.ASS_POWER
+	
+	elif !is_on_floor():
+		if velocity.y < 0:
+			state_atu = State.JUMPING
+		else:
+			if Input.is_action_pressed("plan"):
+				state_atu = State.PLANNING
+			else:
+				state_atu = State.FALLING
+	
+	elif Input.is_action_pressed("walk_right") or Input.is_action_pressed("walk_left"):
+		if velocity.x == speed:
+			state_atu = State.WALKING
+	
+	elif is_on_wall():
+		state_atu = State.WALL_SLIDE
+		if Input.is_action_pressed("RUN"):
+			state_atu = State.WALL_RUN
+	
+	elif Input.is_action_pressed("RUN"):
+		if abs(velocity.x) > speed and abs(velocity.x) < speed + 400:
+			state_atu = State.RUN_1
+		elif abs(velocity.x) > 1200 and abs(velocity.x) < 1600:
+			state_atu = State.RUN_2
+		elif abs(velocity.x) > 1600:
+			state_atu = State.RUN_3
+	
+	
+	elif Input.is_action_just_pressed("PORRADA"):
+		state_atu = State.VIOLENCIA
+	
+	else:
+		state_atu = State.IDLE
