@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dxuv57onql6ch" path="res://sprites/Canie fall (2).png" id="2_qhqgy"]
 [ext_resource type="Texture2D" uid="uid://bu4i638bd4td4" path="res://sprites/Canie-idle.png" id="4_dqkch"]
 [ext_resource type="Texture2D" uid="uid://4vxkmwqc5nsy" path="res://sprites/Canie-walktst2.png" id="5_qlg0r"]
-[ext_resource type="AudioStream" uid="uid://cqefivj5q5aa4" path="res://154684_DarKsidE555___Zero_Resurre.mp3" id="6_tuyoq"]
+[ext_resource type="AudioStream" uid="uid://cbe1d3a234e33" path="res://02. X-Buster.mp3" id="6_smehm"]
 [ext_resource type="Texture2D" uid="uid://oew7x3p4hrpt" path="res://sprites/tecido-ccc.png" id="8_smehm"]
 [ext_resource type="Script" uid="uid://gvrxuups251j" path="res://scenes/cachecol_fisics2.gd" id="9_ur7pv"]
 
@@ -221,7 +221,8 @@ shape = SubResource("RectangleShape2D_qlg0r")
 debug_color = Color(1, 0.6, 0.69803923, 0.41960785)
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource("6_tuyoq")
+stream = ExtResource("6_smehm")
+autoplay = true
 parameters/looping = true
 
 [node name="ASS_ASS_POWER" type="Area2D" parent="." groups=["ASS_POWER"]]

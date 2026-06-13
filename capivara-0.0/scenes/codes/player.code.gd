@@ -466,7 +466,10 @@ func _player_buxa_levou_dano(area: Area2D) -> void:
 		levou_damage = false
 
 func _state_machine():
-	if levou_damage:
+	if Input.is_action_just_pressed("PORRADA"):
+		state_atu = State.VIOLENCIA
+	
+	elif levou_damage:
 		state_atu = State.MACHUCADINHO
 	
 	elif ass_powered:
@@ -481,15 +484,6 @@ func _state_machine():
 			else:
 				state_atu = State.FALLING
 	
-	elif Input.is_action_pressed("walk_right") or Input.is_action_pressed("walk_left"):
-		if velocity.x == speed:
-			state_atu = State.WALKING
-	
-	elif is_on_wall():
-		state_atu = State.WALL_SLIDE
-		if Input.is_action_pressed("RUN"):
-			state_atu = State.WALL_RUN
-	
 	elif Input.is_action_pressed("RUN"):
 		if abs(velocity.x) > speed and abs(velocity.x) < speed + 400:
 			state_atu = State.RUN_1
@@ -498,9 +492,14 @@ func _state_machine():
 		elif abs(velocity.x) > 1600:
 			state_atu = State.RUN_3
 	
+	elif Input.is_action_pressed("walk_right") or Input.is_action_pressed("walk_left"):
+		if velocity.x == speed:
+			state_atu = State.WALKING
 	
-	elif Input.is_action_just_pressed("PORRADA"):
-		state_atu = State.VIOLENCIA
+	elif is_on_wall():
+		state_atu = State.WALL_SLIDE
+		if Input.is_action_pressed("RUN"):
+			state_atu = State.WALL_RUN
 	
 	else:
 		state_atu = State.IDLE
